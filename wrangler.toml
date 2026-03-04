@@ -1,6 +1,0 @@
-name = "elysia-cf-starter"
-main = "src/index.ts"
-compatibility_date = "2026-01-15"
-compatibility_flags = [ "nodejs_als" ]
-assets = { directory = "public" }
-observability = { enabled = true }

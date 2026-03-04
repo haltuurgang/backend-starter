@@ -3,6 +3,7 @@ import { CloudflareAdapter } from "elysia/adapter/cloudflare-worker";
 import { cors } from "@elysiajs/cors";
 import { openapi } from "@elysiajs/openapi";
 import { database } from "./ctx/database";
+import { cfBindings } from "~/ctx/cf-bindings";
 import { betterAuth } from "~/ctx/better-auth";
 import { OpenAPI } from "./lib/auth";
 
@@ -17,6 +18,7 @@ export default new Elysia({
       allowedHeaders: ["Content-Type", "Authorization"],
     })
   )
+  .use(cfBindings)
   .use(betterAuth)
   .use(database)
   .use(

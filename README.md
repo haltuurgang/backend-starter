@@ -1,13 +1,14 @@
 # elysia-cf-starter
 
-A modern, type-safe starter template for building APIs with [Elysia.js](https://elysiajs.com) on [Cloudflare Workers](https://workers.cloudflare.com/), featuring [Drizzle ORM](https://orm.drizzle.team/) with LibSQL/Turso and [Better Auth](https://www.better-auth.com/) for authentication.
+A modern, type-safe starter template for building APIs with [Elysia.js](https://elysiajs.com) on [Cloudflare Workers](https://workers.cloudflare.com/), featuring [Drizzle ORM](https://orm.drizzle.team/) with Cloudflare D1 and [Better Auth](https://www.better-auth.com/) for authentication.
 
 ## ✨ Features
 
 - ⚡ **Elysia.js** - Fast, type-safe web framework
 - 🌐 **Cloudflare Workers** - Edge-first serverless deployment
-- 🗃️ **Drizzle ORM** - Type-safe SQL with LibSQL/Turso
+- 🗃️ **Drizzle ORM** - Type-safe SQL with Cloudflare D1
 - 🔐 **Better Auth** - Modern authentication with email/password
+- 🪣 **R2 + KV Bindings** - Built-in object storage and key-value cache access
 - 📖 **OpenAPI** - Auto-generated API documentation
 - 🔒 **CORS** - Pre-configured cross-origin support
 
@@ -15,7 +16,7 @@ A modern, type-safe starter template for building APIs with [Elysia.js](https://
 
 - [Bun](https://bun.sh) (v1.0+)
 - [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/)
-- A [Turso](https://turso.tech/) database (or any LibSQL-compatible database)
+- A Cloudflare account with D1, R2, and KV resources
 
 ## 🚀 Getting Started
 
@@ -36,10 +37,13 @@ cp .dev.examples .dev.vars
 Edit `.dev.vars` with your credentials:
 
 ```env
-DATABASE_URL=libsql://your-database.turso.io
-DATABASE_AUTH_TOKEN=your-turso-auth-token
 BETTER_AUTH_SECRET=your-secure-secret-key
+CLOUDFLARE_ACCOUNT_ID=your-account-id
+CLOUDFLARE_DATABASE_ID=your-d1-database-id
+CLOUDFLARE_D1_TOKEN=your-cloudflare-api-token
 ```
+
+Then update `wrangler.jsonc` with your real resource IDs for `DB`, `BUCKET`, and `CACHE`.
 
 ### 3. Generate Cloudflare types
 
@@ -54,6 +58,12 @@ Generate and run migrations:
 ```bash
 bun run db:generate
 bun run db:migrate
+```
+
+To apply migrations to your remote D1 database:
+
+```bash
+bun run db:migrate:remote
 ```
 
 ### 5. Start development server
@@ -71,7 +81,8 @@ Your API will be available at `http://localhost:8787`
 | `bun run dev`         | Start local development server   |
 | `bun run deploy`      | Deploy to Cloudflare Workers     |
 | `bun run db:generate` | Generate Drizzle migrations      |
-| `bun run db:migrate`  | Apply database migrations        |
+| `bun run db:migrate`  | Apply D1 migrations (local)      |
+| `bun run db:migrate:remote` | Apply D1 migrations (remote) |
 | `bun run db:studio`   | Open Drizzle Studio GUI          |
 | `bun run cf-types`    | Generate Cloudflare Worker types |
 
@@ -82,6 +93,7 @@ Your API will be available at `http://localhost:8787`
 │   ├── index.ts          # Main application entry
 │   ├── ctx/
 │   │   ├── better-auth.ts # Auth plugin & middleware
+│   │   ├── cf-bindings.ts  # Cloudflare bindings context
 │   │   └── database.ts    # Database context
 │   ├── db/
 │   │   ├── index.ts       # Drizzle client setup
@@ -92,7 +104,8 @@ Your API will be available at `http://localhost:8787`
 ├── drizzle/
 │   └── migrations/        # Database migrations
 ├── drizzle.config.ts      # Drizzle Kit configuration
-├── wrangler.toml          # Cloudflare Workers config
+├── env.d.ts               # Env and context type augmentation
+├── wrangler.jsonc         # Cloudflare Workers config & bindings
 └── worker-configuration.d.ts # Generated CF types
 ```
 
